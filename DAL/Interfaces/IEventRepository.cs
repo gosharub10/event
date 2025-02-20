@@ -1,6 +1,8 @@
+using DAL.Models;
+
 namespace DAL.Interfaces;
 
-public interface IEventRepository
+public interface IEventRepository: IRepository<Event>
 {
     
 }

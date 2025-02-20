@@ -1,6 +1,6 @@
 namespace DAL.Interfaces;
 
-public interface IUserRepository
+public interface IUserRepository: IRepository<User>
 {
     
 }
