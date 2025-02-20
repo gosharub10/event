@@ -1,0 +1,33 @@
+﻿services:
+  api:
+    build:
+      context: .
+      dockerfile: API/Dockerfile
+    environment:
+      - ASPNETCORE_URLS=http://0.0.0.0:8080
+    ports:
+      - "5444:8080"
+    networks:
+      - app_network
+  
+  db:
+    image: postgres:16-alpine
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: event
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app_network
+      
+
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
