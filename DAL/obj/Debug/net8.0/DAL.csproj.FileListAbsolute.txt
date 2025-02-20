@@ -12,3 +12,4 @@
 /Users/maksimbogdanovich/Desktop/Новая папка/API/DAL/obj/Debug/net8.0/ref/DAL.dll
 /Users/maksimbogdanovich/Desktop/Новая папка/API/DAL/bin/Debug/net8.0/DAL.runtimeconfig.json
 /Users/maksimbogdanovich/Desktop/Новая папка/API/DAL/obj/Debug/net8.0/DAL.genruntimeconfig.cache
+/Users/maksimbogdanovich/Desktop/Новая папка/API/DAL/obj/Debug/net8.0/DAL.sourcelink.json
