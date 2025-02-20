@@ -1,0 +1,14 @@
+/Users/maksimbogdanovich/Desktop/Новая папка/API/DAL/bin/Debug/net8.0/DAL.deps.json
+/Users/maksimbogdanovich/Desktop/Новая папка/API/DAL/bin/Debug/net8.0/DAL.dll
+/Users/maksimbogdanovich/Desktop/Новая папка/API/DAL/bin/Debug/net8.0/DAL.pdb
+/Users/maksimbogdanovich/Desktop/Новая папка/API/DAL/obj/Debug/net8.0/DAL.csproj.AssemblyReference.cache
+/Users/maksimbogdanovich/Desktop/Новая папка/API/DAL/obj/Debug/net8.0/DAL.GeneratedMSBuildEditorConfig.editorconfig
+/Users/maksimbogdanovich/Desktop/Новая папка/API/DAL/obj/Debug/net8.0/DAL.AssemblyInfoInputs.cache
+/Users/maksimbogdanovich/Desktop/Новая папка/API/DAL/obj/Debug/net8.0/DAL.AssemblyInfo.cs
+/Users/maksimbogdanovich/Desktop/Новая папка/API/DAL/obj/Debug/net8.0/DAL.csproj.CoreCompileInputs.cache
+/Users/maksimbogdanovich/Desktop/Новая папка/API/DAL/obj/Debug/net8.0/DAL.dll
+/Users/maksimbogdanovich/Desktop/Новая папка/API/DAL/obj/Debug/net8.0/refint/DAL.dll
+/Users/maksimbogdanovich/Desktop/Новая папка/API/DAL/obj/Debug/net8.0/DAL.pdb
+/Users/maksimbogdanovich/Desktop/Новая папка/API/DAL/obj/Debug/net8.0/ref/DAL.dll
+/Users/maksimbogdanovich/Desktop/Новая папка/API/DAL/bin/Debug/net8.0/DAL.runtimeconfig.json
+/Users/maksimbogdanovich/Desktop/Новая папка/API/DAL/obj/Debug/net8.0/DAL.genruntimeconfig.cache
