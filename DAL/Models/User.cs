@@ -1,11 +1,11 @@
-using DAL.Models;
 using Microsoft.AspNetCore.Identity;
 
-public class User : IdentityUser
+namespace DAL.Models;
+
+public class User : IdentityUser<int>
 {
     public string FirstName { get; set; }
     public string LastName { get; set; }
-    public DateTime RegistrationDate { get; set; }
-    public DateTime Birthday { get; set; }
-    public virtual ICollection<Event> Events { get; set; }
+    public DateOnly Birthday { get; set; }
+    public virtual ICollection<EventParticipant> EventParticipants { get; set; }
 }

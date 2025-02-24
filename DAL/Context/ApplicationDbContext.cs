@@ -1,10 +1,11 @@
 using DAL.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace DAL.Context;
 
-public class ApplicationDbContext: IdentityDbContext<User>
+public class ApplicationDbContext: IdentityDbContext<User, IdentityRole<int>, int>
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
@@ -15,15 +16,24 @@ public class ApplicationDbContext: IdentityDbContext<User>
     }
     
     public DbSet<Event> Events { get; set; }
+    public DbSet<EventParticipant> EventParticipants { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<Event>()
-            .HasMany(e => e.Participants)
-            .WithMany(u => u.Events)
-            .UsingEntity(j => j.ToTable("EventParticipants"));
+        modelBuilder.Entity<EventParticipant>()
+            .HasKey(ep => new { ep.EventId, ep.UserId }); 
+
+        modelBuilder.Entity<EventParticipant>()
+            .HasOne(ep => ep.Event)          
+            .WithMany(e => e.EventParticipants) 
+            .HasForeignKey(ep => ep.EventId); 
+
+        modelBuilder.Entity<EventParticipant>()
+            .HasOne(ep => ep.User)          
+            .WithMany(u => u.EventParticipants) 
+            .HasForeignKey(ep => ep.UserId);  
     }
     
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

@@ -1,0 +1,16 @@
+/Users/maksimbogdanovich/Desktop/Новая папка/API/BLL/bin/Debug/net8.0/BLL.deps.json
+/Users/maksimbogdanovich/Desktop/Новая папка/API/BLL/bin/Debug/net8.0/BLL.dll
+/Users/maksimbogdanovich/Desktop/Новая папка/API/BLL/bin/Debug/net8.0/BLL.pdb
+/Users/maksimbogdanovich/Desktop/Новая папка/API/BLL/bin/Debug/net8.0/DAL.dll
+/Users/maksimbogdanovich/Desktop/Новая папка/API/BLL/bin/Debug/net8.0/DAL.pdb
+/Users/maksimbogdanovich/Desktop/Новая папка/API/BLL/obj/Debug/net8.0/BLL.csproj.AssemblyReference.cache
+/Users/maksimbogdanovich/Desktop/Новая папка/API/BLL/obj/Debug/net8.0/BLL.GeneratedMSBuildEditorConfig.editorconfig
+/Users/maksimbogdanovich/Desktop/Новая папка/API/BLL/obj/Debug/net8.0/BLL.AssemblyInfoInputs.cache
+/Users/maksimbogdanovich/Desktop/Новая папка/API/BLL/obj/Debug/net8.0/BLL.AssemblyInfo.cs
+/Users/maksimbogdanovich/Desktop/Новая папка/API/BLL/obj/Debug/net8.0/BLL.csproj.CoreCompileInputs.cache
+/Users/maksimbogdanovich/Desktop/Новая папка/API/BLL/obj/Debug/net8.0/BLL.sourcelink.json
+/Users/maksimbogdanovich/Desktop/Новая папка/API/BLL/obj/Debug/net8.0/BLL.csproj.Up2Date
+/Users/maksimbogdanovich/Desktop/Новая папка/API/BLL/obj/Debug/net8.0/BLL.dll
+/Users/maksimbogdanovich/Desktop/Новая папка/API/BLL/obj/Debug/net8.0/refint/BLL.dll
+/Users/maksimbogdanovich/Desktop/Новая папка/API/BLL/obj/Debug/net8.0/BLL.pdb
+/Users/maksimbogdanovich/Desktop/Новая папка/API/BLL/obj/Debug/net8.0/ref/BLL.dll
