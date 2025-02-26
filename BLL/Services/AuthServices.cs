@@ -56,7 +56,8 @@ internal class AuthServices: IAuthServices
         return new TokenDTO
         {
             AccessToken = "Bearer " + accessToken,
-            RefreshToken = refreshToken
+            RefreshToken = refreshToken,
+            ExpirationAccess = DateTime.UtcNow.AddMinutes(_jwtSettings.Expire)
         };
     }
     
@@ -79,9 +80,7 @@ internal class AuthServices: IAuthServices
             Expires = DateTime.UtcNow.AddMinutes(_jwtSettings.Expire),
             Issuer = _jwtSettings.Issuer,
             Audience = _jwtSettings.Audience,
-            SigningCredentials = new SigningCredentials(
-                new SymmetricSecurityKey(key), 
-                SecurityAlgorithms.HmacSha256)
+            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256)
         };
 
         var token = tokenHandler.CreateToken(tokenDescriptor);
@@ -106,7 +105,8 @@ internal class AuthServices: IAuthServices
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_jwtSettings.Issuer)),
             ValidateLifetime = false, 
             ValidIssuer = _jwtSettings.Issuer,
-            ValidAudience = _jwtSettings.Audience
+            ValidAudience = _jwtSettings.Audience,
+            ClockSkew = TimeSpan.Zero
         };
 
         var tokenHandler = new JwtSecurityTokenHandler();
@@ -126,9 +126,12 @@ internal class AuthServices: IAuthServices
         return principal;
     }
     
-    public async Task<TokenDTO> RefreshToken(TokenDTO tokenDto)
+    public async Task<TokenDTO> RefreshToken(string tokenDto)
     {
-        var principal = GetPrincipalFromExpiredToken(tokenDto.AccessToken);
+        if (string.IsNullOrWhiteSpace(tokenDto))
+            throw new ArgumentNullException(nameof(tokenDto));
+        
+        var principal = GetPrincipalFromExpiredToken(tokenDto);
         var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         var user = await _userRepository.GetById(int.Parse(userId!));
@@ -138,7 +141,7 @@ internal class AuthServices: IAuthServices
             throw new SecurityTokenException();
         }
 
-        var newAccessToken = GenerateAccessToken(user);
+        var newAccessToken = await GenerateAccessToken(user);
         var newRefreshToken = GenerateRefreshToken();
 
         user.RefreshToken = newRefreshToken;
