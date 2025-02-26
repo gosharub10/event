@@ -1,3 +1,4 @@
+using System.Globalization;
 using DAL.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -34,13 +35,46 @@ public class ApplicationDbContext: IdentityDbContext<User, IdentityRole<int>, in
             .HasOne(ep => ep.User)          
             .WithMany(u => u.EventParticipants) 
             .HasForeignKey(ep => ep.UserId);  
-    }
-    
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        if (!optionsBuilder.IsConfigured)
+        
+        modelBuilder.Entity<IdentityRole<int>>(b =>
         {
-            optionsBuilder.UseNpgsql("Host=localhost;Port=5433;Database=event;Username=user;Password=password");
-        }
+            b.ToTable("AspNetRoles");
+        });
+        
+        var admin = new IdentityRole<int>("admin");
+        admin.NormalizedName = admin.Name!.ToUpper();
+        admin.Id = 1;
+
+        var client = new IdentityRole<int>("user");
+        client.NormalizedName = client.Name!.ToUpper();
+        client.Id = 2;
+        
+        modelBuilder.Entity<IdentityRole<int>>().HasData(admin, client);
+        
+        var adminUser = new User
+        {
+            Id = 1,
+            UserName = "admin@admin.com",
+            NormalizedUserName = "ADMIN@ADMIN.COM",
+            Email = "admin@admin.com",
+            NormalizedEmail = "ADMIN@ADMIN.COM",
+            SecurityStamp = Guid.NewGuid().ToString("D"),
+            FirstName = "Admin",
+            LastName = "Admin",
+            Birthday = DateOnly.FromDateTime(DateTime.ParseExact("2005-10-10", "yyyy-MM-dd", CultureInfo.InvariantCulture))
+        };
+
+        var hasher = new PasswordHasher<User>();
+        adminUser.PasswordHash = hasher.HashPassword(adminUser, "admin");
+
+        modelBuilder.Entity<User>().HasData(adminUser);
+
+        modelBuilder.Entity<IdentityUserRole<int>>().HasData(
+            new IdentityUserRole<int>
+            {
+                RoleId = admin.Id,
+                UserId = adminUser.Id
+            }
+        );
     }
 }

@@ -13,5 +13,7 @@ public class EventConfigMapper: IRegister
                 src => src.EventParticipants != null 
                     ? src.EventParticipants.Adapt<List<UserDTO>>(config) 
                     : new List<UserDTO>());
+
+        config.NewConfig<EventNewDTO, Event>();
     }
 }

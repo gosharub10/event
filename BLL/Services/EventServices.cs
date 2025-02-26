@@ -1,5 +1,6 @@
 using BLL.DTO;
 using BLL.Interfaces;
+using DAL.Helpers;
 using DAL.Interfaces;
 using DAL.Models;
 using FluentValidation;
@@ -11,19 +12,15 @@ internal class EventServices: IEventServices
 {
     private readonly IEventRepository _eventRepository;
     private readonly IMapper _mapper;
-    private readonly IValidator<EventDTO> _validator;
+    private readonly IValidator<EventNewDTO> _validatorNewEvent;
+    private readonly IValidator<EventDTO> _validatorEvent;
 
-    public EventServices(IEventRepository eventRepository, IMapper mapper, IValidator<EventDTO> validator)
+    public EventServices(IEventRepository eventRepository, IMapper mapper, IValidator<EventNewDTO> validatorNewEvent, IValidator<EventDTO> validatorEvent)
     {
         _eventRepository = eventRepository;
         _mapper = mapper;
-        _validator = validator;
-    }
-
-    public async Task<List<EventDTO>> GetAllEvents()
-    {
-        var events = await _eventRepository.GetAll(); 
-        return _mapper.Map<List<EventDTO>>(events);
+        _validatorNewEvent = validatorNewEvent;
+        _validatorEvent = validatorEvent;
     }
 
     public async Task<EventDTO> GetEventById(int id)
@@ -38,9 +35,9 @@ internal class EventServices: IEventServices
         return _mapper.Map<EventDTO>(foundEvent);
     }
 
-    public async Task AddEvent(EventDTO eventDto)
+    public async Task AddEvent(EventNewDTO eventDto)
     {
-        var validationResult = await _validator.ValidateAsync(eventDto);
+        var validationResult = await _validatorNewEvent.ValidateAsync(eventDto);
         if (!validationResult.IsValid)
             throw new ValidationException(validationResult.Errors);
         
@@ -50,7 +47,7 @@ internal class EventServices: IEventServices
 
     public async Task UpdateEvent(EventDTO eventDto)
     {
-        var validationResult = await _validator.ValidateAsync(eventDto);
+        var validationResult = await _validatorEvent.ValidateAsync(eventDto);
         if (!validationResult.IsValid)
             throw new ValidationException(validationResult.Errors);
         
@@ -63,18 +60,23 @@ internal class EventServices: IEventServices
         await _eventRepository.Delete(id);
     }
 
-    public async Task<List<EventDTO>> GetAll(DateOnly? date, string? location, string? category)
+    public async Task<List<EventDTO>> GetAll(QueryHelperDTO query)
     {
-        var events = await _eventRepository.GetAll();
-    
-        if (date != null)
-            events = events.Where(e => e.EventDateTime == date.Value).ToList();
-    
-        if (!string.IsNullOrEmpty(location) )
-            events = events.Where(e => e.Location.Equals(location, StringComparison.OrdinalIgnoreCase)).ToList();
-    
-        if (!string.IsNullOrEmpty(category))
-            events = events.Where(e => e.Category.Equals(category, StringComparison.OrdinalIgnoreCase)).ToList();
+        var events = await _eventRepository.GetAll(_mapper.Map<QueryHelper>(query));
+        
+        // DateOnly? parsedDate = null;
+        //
+        // if (!string.IsNullOrEmpty(query.Date) && DateOnly.TryParseExact(query.Date, "yyyy-MM-dd", out var dateOnly))
+        //     parsedDate = dateOnly;
+        //
+        // if (parsedDate != null)
+        //     events = events.Where(e => e.EventDateTime == parsedDate).ToList();
+        //
+        // if (!string.IsNullOrEmpty(query.Location) )
+        //     events = events.Where(e => e.Location.Equals(query.Location, StringComparison.OrdinalIgnoreCase)).ToList();
+        //
+        // if (!string.IsNullOrEmpty(query.Category))
+        //     events = events.Where(e => e.Category.Equals(query.Category, StringComparison.OrdinalIgnoreCase)).ToList();
 
         return _mapper.Map<List<EventDTO>>(events);
     }

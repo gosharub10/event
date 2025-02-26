@@ -4,6 +4,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace DAL.Migrations
 {
     /// <inheritdoc />
@@ -36,6 +38,8 @@ namespace DAL.Migrations
                     FirstName = table.Column<string>(type: "text", nullable: false),
                     LastName = table.Column<string>(type: "text", nullable: false),
                     Birthday = table.Column<DateOnly>(type: "date", nullable: false),
+                    RefreshToken = table.Column<string>(type: "text", nullable: true),
+                    RefreshTokenExpiryTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
@@ -205,6 +209,25 @@ namespace DAL.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.InsertData(
+                table: "AspNetRoles",
+                columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
+                values: new object[,]
+                {
+                    { 1, null, "admin", "ADMIN" },
+                    { 2, null, "user", "USER" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "AspNetUsers",
+                columns: new[] { "Id", "AccessFailedCount", "Birthday", "ConcurrencyStamp", "Email", "EmailConfirmed", "FirstName", "LastName", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "RefreshToken", "RefreshTokenExpiryTime", "SecurityStamp", "TwoFactorEnabled", "UserName" },
+                values: new object[] { 1, 0, new DateOnly(2005, 10, 10), "75e34159-7109-4db5-ac1c-6184c585c0eb", "admin@admin.com", false, "Admin", "Admin", false, null, "ADMIN@ADMIN.COM", "ADMIN@ADMIN.COM", "AQAAAAIAAYagAAAAECRPA0MJTWAb31pJ7vGfBlBiKdFWmZGLQ6N2xT1Rkyd35ZiJlQfHbonfMNAEh3CeFQ==", null, false, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "64ca4a2d-bdc1-443f-91d5-024ecb26e8e0", false, "admin@admin.com" });
+
+            migrationBuilder.InsertData(
+                table: "AspNetUserRoles",
+                columns: new[] { "RoleId", "UserId" },
+                values: new object[] { 1, 1 });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",

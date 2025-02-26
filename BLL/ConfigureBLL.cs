@@ -22,12 +22,16 @@ public static class ConfigurationExtensions
         
         config.Scan(Assembly.GetAssembly(typeof(EventConfigMapper))!);
         config.Scan(Assembly.GetAssembly(typeof(EventParticipantsMapper))!);
+        config.Scan(Assembly.GetAssembly(typeof(UserRegistrationDTO))!);
         
         services.AddSingleton(config);
         services.AddScoped<IMapper, ServiceMapper>();
         
         services.AddTransient<IEventServices, EventServices>();
         services.AddTransient<IUserServices, UserServices>();
+        services.AddTransient<IAuthServices, AuthServices>();
+        services.AddTransient<IValidator<EventNewDTO>, EventNewValidator>();
+        services.AddTransient<IValidator<UserRegistrationDTO>, UserValidator>();
         services.AddTransient<IValidator<EventDTO>, EventValidator>();
     }
 }

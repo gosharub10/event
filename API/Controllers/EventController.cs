@@ -1,11 +1,13 @@
 using BLL.DTO;
 using BLL.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Policy = "AdminOrUser")]
     public class EventController : ControllerBase
     {
         private readonly IEventServices _eventServices;
@@ -14,7 +16,7 @@ namespace API.Controllers
         {
             _eventServices = eventServices;
         }
-
+        
         [HttpGet("get/{id:int}")]
         public async Task<IActionResult> GetEventById(int id)
         {
@@ -28,31 +30,29 @@ namespace API.Controllers
         }
 
         [HttpGet("all")]
-        public async Task<IActionResult> GetEventByFilter([FromQuery] string? date, [FromQuery] string? location, [FromQuery] string? category)
+        public async Task<IActionResult> GetEventByFilter([FromQuery] QueryHelperDTO query)
         {
-            DateOnly? parsedDate = null;
-
-            if (!string.IsNullOrEmpty(date) && DateOnly.TryParseExact(date, "yyyy-MM-dd", out var dateOnly))
-                parsedDate = dateOnly;
-            
-            var events = await _eventServices.GetAll(parsedDate, location, category);
+            var events = await _eventServices.GetAll(query);
             return Ok(events);
         }
         
+        [Authorize(Policy = "Admin")]
         [HttpPost("add")]
-        public async Task<IActionResult> AddEvent([FromBody] EventDTO eventDto)
+        public async Task<IActionResult> AddEvent([FromBody] EventNewDTO eventDto)
         {
             await _eventServices.AddEvent(eventDto);
             return Ok();
         }
-
+        
+        [Authorize(Policy = "Admin")]
         [HttpPut("update")]
         public async Task<IActionResult> UpdateEvent([FromBody] EventDTO eventDto)
         {
             await _eventServices.UpdateEvent(eventDto);
             return Ok("success update");
         }
-
+        
+        [Authorize(Policy = "Admin")]
         [HttpDelete("delete/{id:int}")]
         public async Task<IActionResult> DeleteEvent(int id)
         {
@@ -60,6 +60,7 @@ namespace API.Controllers
             return Ok("success delete");
         }
         
+        [Authorize(Policy = "Admin")]
         [HttpPut("upload/{id:int}")]
         public async Task<IActionResult> UpdateEventImage(int id, IFormFile? imageFile)
         {

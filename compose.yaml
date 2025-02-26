@@ -4,9 +4,12 @@
       context: .
       dockerfile: API/Dockerfile
     environment:
-      - ASPNETCORE_URLS=http://0.0.0.0:8080
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
     ports:
-      - "5444:8080"
+      - "5444:80"
+    depends_on:
+      - db
     networks:
       - app_network
   

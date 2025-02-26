@@ -10,7 +10,6 @@ services:
     - "dotnet"
     - "/app/bin/Debug/net8.0/API.dll"
     environment:
-      ASPNETCORE_ENVIRONMENT: "Development"
       DOTNET_USE_POLLING_FILE_WATCHER: "true"
     image: "api:dev"
     ports: []

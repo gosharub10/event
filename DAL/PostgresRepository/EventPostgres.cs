@@ -1,4 +1,5 @@
 using DAL.Context;
+using DAL.Helpers;
 using DAL.Interfaces;
 using DAL.Models;
 using Microsoft.EntityFrameworkCore;
@@ -40,6 +41,30 @@ internal class EventPostgres: IEventRepository
             .Include(e => e.EventParticipants)
             .ThenInclude(u => u.User) 
             .ToListAsync();
+    }
+
+    public async Task<List<Event>> GetAll(QueryHelper query)
+    {
+        var eventsQuery = _context.Events.AsQueryable();
+
+        if (!string.IsNullOrEmpty(query.Date))
+        {
+            if (DateOnly.TryParse(query.Date, out var parsedDate))
+            {
+                eventsQuery = eventsQuery.Where(e => e.EventDateTime == parsedDate);
+            }
+        }
+
+        if (!string.IsNullOrEmpty(query.Location))
+            eventsQuery = eventsQuery.Where(e => e.Location.Contains(query.Location));
+
+        if (!string.IsNullOrEmpty(query.Category))
+            eventsQuery = eventsQuery.Where(e => e.Category.Contains(query.Category));
+
+        return await eventsQuery
+            .Skip((query.Page - 1) * query.PageSize)
+            .Take(query.PageSize)
+            .ToListAsync();;
     }
 
     public async Task<Event> GetById(int id)

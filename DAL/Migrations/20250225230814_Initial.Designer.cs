@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250224185309_Initial")]
+    [Migration("20250225230814_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -137,6 +137,12 @@ namespace DAL.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("RefreshTokenExpiryTime")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");
 
@@ -157,6 +163,28 @@ namespace DAL.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            AccessFailedCount = 0,
+                            Birthday = new DateOnly(2005, 10, 10),
+                            ConcurrencyStamp = "75e34159-7109-4db5-ac1c-6184c585c0eb",
+                            Email = "admin@admin.com",
+                            EmailConfirmed = false,
+                            FirstName = "Admin",
+                            LastName = "Admin",
+                            LockoutEnabled = false,
+                            NormalizedEmail = "ADMIN@ADMIN.COM",
+                            NormalizedUserName = "ADMIN@ADMIN.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAECRPA0MJTWAb31pJ7vGfBlBiKdFWmZGLQ6N2xT1Rkyd35ZiJlQfHbonfMNAEh3CeFQ==",
+                            PhoneNumberConfirmed = false,
+                            RefreshTokenExpiryTime = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            SecurityStamp = "64ca4a2d-bdc1-443f-91d5-024ecb26e8e0",
+                            TwoFactorEnabled = false,
+                            UserName = "admin@admin.com"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<int>", b =>
@@ -186,6 +214,20 @@ namespace DAL.Migrations
                         .HasDatabaseName("RoleNameIndex");
 
                     b.ToTable("AspNetRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "admin",
+                            NormalizedName = "ADMIN"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "user",
+                            NormalizedName = "USER"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -270,6 +312,13 @@ namespace DAL.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetUserRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            UserId = 1,
+                            RoleId = 1
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
