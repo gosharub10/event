@@ -20,18 +20,24 @@ namespace API.Controllers
         }
 
         [HttpGet("get/{id:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesDefaultResponseType]
         public async Task<IActionResult> GetUserById(int id)
         {
             return Ok(await _userServices.GetByIdAsync(id));
         }
 
         [HttpGet("get/{title}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesDefaultResponseType]
         public async Task<IActionResult> GetUserByEventTitle(string title)
         {
             return Ok(await _userServices.GetByEventName(title));
         }
 
         [HttpPost("registrationParticipants/{eventId:int}/{userId:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesDefaultResponseType]
         public async Task<IActionResult> RegistrationParticipant(int eventId, int userId)
         {
             await _userServices.AddUserToEvent(eventId, userId);
@@ -39,35 +45,12 @@ namespace API.Controllers
         }
 
         [HttpDelete("removeParticipant/{eventId:int}/{userId:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesDefaultResponseType]
         public async Task<IActionResult> RemoveParticipant(int eventId, int userId)
         {
             await _userServices.RemoveUserFromEvent(eventId, userId);
             return Ok("removal participants success");
-        }
-        
-        [AllowAnonymous]
-        [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] UserRegistrationDTO user)
-        {
-            await _authServices.Registration(user);
-            
-            return Ok("registration success");
-        }
-        
-        [AllowAnonymous]
-        [HttpPost("login")]
-        public async Task<IActionResult> Register([FromBody] LoginDTO user)
-        {
-            var token = await _authServices.Login(user);
-            return Ok(token);
-        }
-
-        [AllowAnonymous]
-        [HttpPost("refresh")]
-        public async Task<IActionResult> RefreshToken(TokenDTO tokenDto)
-        {
-            var newTokenDto = await _authServices.RefreshToken(tokenDto);
-            return Ok(newTokenDto);
         }
     }
 }

@@ -18,18 +18,26 @@ namespace API.Controllers
         }
         
         [HttpGet("get/{id:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
         public async Task<IActionResult> GetEventById(int id)
         {
             return Ok(await _eventServices.GetEventById(id));
         }
 
         [HttpGet("get/{title}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
         public async Task<IActionResult> GetEventByTitle(string title)
         {
             return Ok(await _eventServices.GetEventByName(title));
         }
 
         [HttpGet("all")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesDefaultResponseType]
         public async Task<IActionResult> GetEventByFilter([FromQuery] QueryHelperDTO query)
         {
             var events = await _eventServices.GetAll(query);
@@ -38,6 +46,8 @@ namespace API.Controllers
         
         [Authorize(Policy = "Admin")]
         [HttpPost("add")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesDefaultResponseType]
         public async Task<IActionResult> AddEvent([FromBody] EventNewDTO eventDto)
         {
             await _eventServices.AddEvent(eventDto);
@@ -46,6 +56,8 @@ namespace API.Controllers
         
         [Authorize(Policy = "Admin")]
         [HttpPut("update")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesDefaultResponseType]
         public async Task<IActionResult> UpdateEvent([FromBody] EventDTO eventDto)
         {
             await _eventServices.UpdateEvent(eventDto);
@@ -54,6 +66,8 @@ namespace API.Controllers
         
         [Authorize(Policy = "Admin")]
         [HttpDelete("delete/{id:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesDefaultResponseType]
         public async Task<IActionResult> DeleteEvent(int id)
         {
             await _eventServices.DeleteEvent(id);
@@ -62,6 +76,8 @@ namespace API.Controllers
         
         [Authorize(Policy = "Admin")]
         [HttpPut("upload/{id:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesDefaultResponseType]
         public async Task<IActionResult> UpdateEventImage(int id, IFormFile? imageFile)
         {
             if (imageFile == null) 
