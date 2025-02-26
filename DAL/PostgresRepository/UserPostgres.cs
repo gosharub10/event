@@ -30,7 +30,7 @@ internal class UserPostgres: IUserRepository
         var role = await _userManager.AddToRoleAsync(entity,"user");
         if (!result.Succeeded)
         {
-            throw new Exception("Cannot create role: " + string.Join(", ", result.Errors.Select(e => e.Description)));
+            throw new Exception("cannot create role: " + string.Join(", ", result.Errors.Select(e => e.Description)));
         }
     }
 
@@ -63,13 +63,13 @@ internal class UserPostgres: IUserRepository
         var user = await _userManager.FindByEmailAsync(email);
         if (user == null)
         {
-            throw new Exception("Invalid password or email");
+            throw new Exception("invalid password or email");
         }
 
         var result = await _signInManager.CheckPasswordSignInAsync(user, password, false);
         if (!result.Succeeded)
         {
-            throw new Exception("Invalid password or email");
+            throw new Exception("invalid password or email");
         }
 
         return user;

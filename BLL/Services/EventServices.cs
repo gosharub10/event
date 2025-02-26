@@ -64,20 +64,6 @@ internal class EventServices: IEventServices
     {
         var events = await _eventRepository.GetAll(_mapper.Map<QueryHelper>(query));
         
-        // DateOnly? parsedDate = null;
-        //
-        // if (!string.IsNullOrEmpty(query.Date) && DateOnly.TryParseExact(query.Date, "yyyy-MM-dd", out var dateOnly))
-        //     parsedDate = dateOnly;
-        //
-        // if (parsedDate != null)
-        //     events = events.Where(e => e.EventDateTime == parsedDate).ToList();
-        //
-        // if (!string.IsNullOrEmpty(query.Location) )
-        //     events = events.Where(e => e.Location.Equals(query.Location, StringComparison.OrdinalIgnoreCase)).ToList();
-        //
-        // if (!string.IsNullOrEmpty(query.Category))
-        //     events = events.Where(e => e.Category.Equals(query.Category, StringComparison.OrdinalIgnoreCase)).ToList();
-
         return _mapper.Map<List<EventDTO>>(events);
     }
 
