@@ -14,42 +14,43 @@ internal class EventParticipantsPostgres: IEventParticipantsRepository
         _context = context;
     }
 
-    public async Task Add(EventParticipant entity)
+    public async Task Add(EventParticipant entity, CancellationToken cancellationToken)
     {
-        await _context.EventParticipants.AddAsync(entity);
-        await _context.SaveChangesAsync();
+        
+        await _context.EventParticipants.AddAsync(entity, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public Task Update(EventParticipant entity)
+    public Task Update(EventParticipant entity, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        return null!;
     }
 
-    public Task Delete(int id)
+    public Task Delete(int id, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        return null!;
     }
 
-    public async Task<List<EventParticipant>> GetAll()
+    public async Task<List<EventParticipant>> GetAll(CancellationToken cancellationToken)
     {
         return await _context.EventParticipants
             .Include(e => e.Event)
             .Include(u => u.User)
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
     }
 
-    public async Task<EventParticipant> GetById(int id)
+    public async Task<EventParticipant> GetById(int id, CancellationToken cancellationToken)
     {
-        return await _context.EventParticipants
+        return (await _context.EventParticipants
             .Include(u => u.User)
             .Include(e => e.Event)
-            .FirstOrDefaultAsync(ep => ep.EventId == id) ?? throw new ArgumentNullException($"event with id {id} not found");
+            .FirstOrDefaultAsync(ep => ep.EventId == id, cancellationToken))!;
     }
 
-    public async Task RemoveParticipant(int eventId, int userId)
+    public async Task RemoveParticipant(int eventId, int userId, CancellationToken cancellationToken)
     {
-        var participant = await _context.EventParticipants.FirstOrDefaultAsync(ep => ep.EventId == eventId && ep.UserId == userId);
+        var participant = await _context.EventParticipants.FirstOrDefaultAsync(ep => ep.EventId == eventId && ep.UserId == userId, cancellationToken);
         _context.EventParticipants.Remove(participant!);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
     }
 }

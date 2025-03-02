@@ -6,4 +6,7 @@
   &lt;TestAncestor&gt;
     &lt;TestId&gt;NUnit3x::3CD0633D-66D5-4BFD-ADF1-6C4314986604::net8.0::TestProject1.Tests&lt;/TestId&gt;
   &lt;/TestAncestor&gt;
+&lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=5aead9fc_002D9ed2_002D4047_002Da149_002De914c2198a04/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="All tests from UnitTest1.cs" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+  &lt;ProjectFile&gt;3CD0633D-66D5-4BFD-ADF1-6C4314986604/f:UnitTest1.cs&lt;/ProjectFile&gt;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>

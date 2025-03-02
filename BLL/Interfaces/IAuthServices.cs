@@ -5,7 +5,7 @@ namespace BLL.Interfaces;
 
 public interface IAuthServices
 {
-    Task Registration(UserRegistrationDTO user);
-    Task<TokenDTO> Login(LoginDTO loginDto);
-    Task<TokenDTO> RefreshToken(string tokenDto);
+    Task Registration(UserRegistrationDTO user, CancellationToken cancellationToken);
+    Task<TokenDTO> Login(LoginDTO loginDto, CancellationToken cancellationToken);
+    Task<TokenDTO> RefreshToken(string tokenDto, CancellationToken cancellationToken);
 }

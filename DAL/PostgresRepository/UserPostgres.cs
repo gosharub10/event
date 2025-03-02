@@ -19,64 +19,56 @@ internal class UserPostgres: IUserRepository
         _context = context;
     }
 
-    public async Task Add(User entity)
+    public async Task Add(User entity, CancellationToken cancellationToken)
     {
-        entity.UserName = entity.Email;
-        var result = await _userManager.CreateAsync(entity, entity.PasswordHash!);
-
-        if (!result.Succeeded)
-            throw new Exception("user creation failed: " + string.Join(", ", result.Errors.Select(e => e.Description)));
+        if (cancellationToken.IsCancellationRequested)
+            return;
         
-        var role = await _userManager.AddToRoleAsync(entity,"user");
-        if (!result.Succeeded)
-        {
-            throw new Exception("cannot create role: " + string.Join(", ", result.Errors.Select(e => e.Description)));
-        }
+        entity.UserName = entity.Email;
+        await _userManager.CreateAsync(entity, entity.PasswordHash!);
+        
+        await _userManager.AddToRoleAsync(entity,"user");
     }
 
-    public Task Update(User entity)
+    public Task Update(User entity, CancellationToken cancellationToken)
     {
         _context.Update(entity);
-        return _context.SaveChangesAsync();
+        return _context.SaveChangesAsync(cancellationToken);
     }
 
-    public Task Delete(int id)
+    public Task Delete(int id, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 
-    public Task<List<User>> GetAll()
+    public Task<List<User>> GetAll(CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<User> GetById(int id)
+    public async Task<User> GetById(int id, CancellationToken cancellationToken)
     {
-        return await _context.Users
+        return (await _context.Users
             .Include(u => u.EventParticipants)
             .ThenInclude(e => e.Event)
-            .FirstOrDefaultAsync(u => u.Id == id) ?? throw new NullReferenceException();
+            .FirstOrDefaultAsync(u => u.Id == id, cancellationToken))!;
     }
     
-    public async Task<User> Login(string email, string password)
+    public async Task<User> Login(string email, string password, CancellationToken cancellationToken)
     {
+        if (cancellationToken.IsCancellationRequested)
+            return null!;
+        
         var user = await _userManager.FindByEmailAsync(email);
-        if (user == null)
-        {
-            throw new Exception("invalid password or email");
-        }
-
-        var result = await _signInManager.CheckPasswordSignInAsync(user, password, false);
-        if (!result.Succeeded)
-        {
-            throw new Exception("invalid password or email");
-        }
+        await _signInManager.CheckPasswordSignInAsync(user, password, false);
 
         return user;
     }
 
-    public async Task<List<string>> GetRoles(User user)
+    public async Task<List<string>> GetRoles(User user, CancellationToken cancellationToken)
     {
+        if (cancellationToken.IsCancellationRequested)
+            return null!;
         return (List<string>)await _userManager.GetRolesAsync(user);
     }
 }

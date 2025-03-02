@@ -4,5 +4,5 @@ namespace DAL.Interfaces;
 
 public interface IEventParticipantsRepository: IRepository<EventParticipant>
 {
-    Task RemoveParticipant(int eventId, int userId);
+    Task RemoveParticipant(int eventId, int userId, CancellationToken cancellationToken);
 }

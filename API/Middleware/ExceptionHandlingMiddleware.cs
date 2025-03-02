@@ -1,5 +1,7 @@
+using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Text.Json;
+using Microsoft.IdentityModel.Tokens;
 
 namespace API.Middleware;
 
@@ -34,9 +36,46 @@ public class ExceptionHandlingMiddleware
 
     private async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
-        var statusCode = HttpStatusCode.InternalServerError;
-        var title = "Server Error";
+        HttpStatusCode statusCode;
+        string title;
 
+        switch (exception)
+        {
+            case ValidationException:
+            case ArgumentException:
+                statusCode = HttpStatusCode.BadRequest; 
+                title = "Invalid Argument"; 
+                break;
+            case OperationCanceledException:
+                statusCode = HttpStatusCode.RequestTimeout; 
+                title = "Operation Timeout Error";
+                break;
+            case KeyNotFoundException:
+                statusCode = HttpStatusCode.NotFound;
+                title = "Resource Not Found";
+                break;
+            case InvalidOperationException:
+                statusCode = HttpStatusCode.BadRequest;
+                title = "Invalid Operation";
+                break;
+            case UnauthorizedAccessException:
+                statusCode = HttpStatusCode.Unauthorized; 
+                title = "Access Denied"; 
+                break;
+            case SecurityTokenException :
+                statusCode = HttpStatusCode.Unauthorized; 
+                title = "Invalid Security Token"; 
+                break;
+            case Exception:
+                statusCode = HttpStatusCode.NotFound;
+                title = "Resource Not Found";
+                break;
+            default:
+                statusCode = HttpStatusCode.InternalServerError; 
+                title = "An unexpected error occurred.";
+                break;
+        }
+        
         var response = new 
         {
             Title = title,

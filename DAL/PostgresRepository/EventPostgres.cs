@@ -1,5 +1,4 @@
 using DAL.Context;
-using DAL.Helpers;
 using DAL.Interfaces;
 using DAL.Models;
 using Microsoft.EntityFrameworkCore;
@@ -14,72 +13,48 @@ internal class EventPostgres: IEventRepository
     {
         _context = context;
     }
-    public async Task Add(Event entity)
+    public async Task Add(Event entity, CancellationToken cancellationToken)
     {
-        await _context.Events.AddAsync(entity);
-        await _context.SaveChangesAsync();
+        await _context.Events.AddAsync(entity, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task Update(Event entity)
+    public async Task Update(Event entity, CancellationToken cancellationToken)
     {
         _context.Events.Update(entity);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task Delete(int id)
+    public async Task Delete(int id, CancellationToken cancellationToken)
     {
-        var entity = await _context.Events.FindAsync(id);
+        var entity = await _context.Events.FindAsync(id, cancellationToken);
         if (entity != null)
         {
             _context.Events.Remove(entity);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
         }
     }
-    public async Task<List<Event>> GetAll()
+    public async Task<List<Event>> GetAll(CancellationToken cancellationToken)
     {
         return await _context.Events
             .Include(e => e.EventParticipants)
             .ThenInclude(u => u.User) 
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
     }
 
-    public async Task<List<Event>> GetAll(QueryHelper query)
+    public async Task<Event> GetById(int id, CancellationToken cancellationToken)
     {
-        var eventsQuery = _context.Events.AsQueryable();
-
-        if (!string.IsNullOrEmpty(query.Date))
-        {
-            if (DateOnly.TryParse(query.Date, out var parsedDate))
-            {
-                eventsQuery = eventsQuery.Where(e => e.EventDateTime == parsedDate);
-            }
-        }
-
-        if (!string.IsNullOrEmpty(query.Location))
-            eventsQuery = eventsQuery.Where(e => e.Location.Contains(query.Location));
-
-        if (!string.IsNullOrEmpty(query.Category))
-            eventsQuery = eventsQuery.Where(e => e.Category.Contains(query.Category));
-
-        return await eventsQuery
-            .Skip((query.Page - 1) * query.PageSize)
-            .Take(query.PageSize)
-            .ToListAsync();;
-    }
-
-    public async Task<Event> GetById(int id)
-    {
-        return await _context.Events
+        return (await _context.Events
             .Include(e => e.EventParticipants)
             .ThenInclude(u => u.User) 
-            .FirstOrDefaultAsync(e => e.Id == id) ?? throw new ArgumentNullException(id.ToString());
+            .FirstOrDefaultAsync(e => e.Id == id, cancellationToken))!;
     }
 
-    public async Task<Event> GetEventByName(string name)
+    public async Task<Event> GetEventByName(string name, CancellationToken cancellationToken)
     {
-        return await _context.Events
+        return (await _context.Events
             .Include(e => e.EventParticipants)
             .ThenInclude(u => u.User)
-            .FirstOrDefaultAsync(e => EF.Functions.ILike(e.Title.ToLower(), name.ToLower())) ?? throw new ArgumentNullException(name);
+            .FirstOrDefaultAsync(e => EF.Functions.ILike(e.Title.ToLower(), name.ToLower()), cancellationToken))!;
     }
 }

@@ -3,11 +3,10 @@ using BLL.Interfaces;
 using DAL.Interfaces;
 using DAL.Models;
 using MapsterMapper;
-using ArgumentNullException = System.ArgumentNullException;
 
 namespace BLL.Services;
 
-internal class UserServices: IUserServices
+internal class UserServices : IUserServices
 {
     private readonly IUserRepository _userRepository;
     private readonly IEventRepository _eventRepository;
@@ -26,27 +25,37 @@ internal class UserServices: IUserServices
         _mapper = mapper;
     }
 
-    public async Task<UserDTO> GetByIdAsync(int id)
+    public async Task<UserDTO> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
-        var user = await _userRepository.GetById(id);
+        if (cancellationToken.IsCancellationRequested)
+            throw new OperationCanceledException("Operation was cancelled.");
+        
+        var user = await _userRepository.GetById(id, cancellationToken) 
+            ?? throw new KeyNotFoundException($"No user found with ID {id}");
+        
         return _mapper.Map<UserDTO>(user);
     }
 
-    public async Task<List<UserDTO>> GetByEventName(string eventName)
+    public async Task<List<UserDTO>> GetByEventName(string eventName, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(eventName))
-            throw new ArgumentNullException(nameof(eventName), "event name cannot be null or empty");
+        if (cancellationToken.IsCancellationRequested)
+            throw new OperationCanceledException("Operation was cancelled.");
 
-        var eventEntity = await _eventRepository.GetEventByName(eventName);
+        if (string.IsNullOrWhiteSpace(eventName))
+            throw new ArgumentException("Event name cannot be null or empty", nameof(eventName));
+
+        var eventEntity = await _eventRepository.GetEventByName(eventName, cancellationToken);
     
         if (eventEntity == null)
-            throw new ArgumentNullException($"event with name {eventName} not found");
+            throw new KeyNotFoundException($"Event with name '{eventName}' not found");
 
-        var eventParticipants = await _eventParticipantsRepository.GetAll();
-        var foundEventParticipants = eventParticipants.Where(e => e.EventId == eventEntity.Id).ToList();
+        var eventParticipants = await _eventParticipantsRepository.GetAll(cancellationToken);
+        var foundEventParticipants = eventParticipants
+            .Where(ep => ep.EventId == eventEntity.Id)
+            .ToList();
         
-        if (foundEventParticipants == null)
-            throw new ArgumentNullException($"no users found for event: {eventName}");
+        if (foundEventParticipants.Count == 0)
+            throw new KeyNotFoundException($"No users found for event: {eventName}");
 
         var usersEvent = foundEventParticipants
             .Select(ep => _mapper.Map<UserDTO>(ep))
@@ -55,17 +64,23 @@ internal class UserServices: IUserServices
         return usersEvent;
     }
 
-    public async Task AddUserToEvent(int eventId, int userId)
+    public async Task AddUserToEvent(int eventId, int userId, CancellationToken cancellationToken)
     {
-        var user = await _userRepository.GetById(userId) ?? throw new ArgumentNullException(nameof(userId));
-        var eventEntity = await _eventRepository.GetById(eventId) ?? throw new ArgumentNullException(nameof(eventId));
+        if (cancellationToken.IsCancellationRequested)
+            throw new OperationCanceledException("Operation was cancelled.");
+
+        var user = await _userRepository.GetById(userId, cancellationToken) 
+            ?? throw new KeyNotFoundException($"User with ID {userId} not found");
         
-        if (eventEntity.MaxParticipants > eventEntity.EventParticipants.Count)
+        var eventEntity = await _eventRepository.GetById(eventId, cancellationToken) 
+            ?? throw new KeyNotFoundException($"Event with ID {eventId} not found");
+        
+        if (eventEntity.EventParticipants.Count >= eventEntity.MaxParticipants)
         {
-            throw new ArgumentException("max participants cannot be greater than max participants");
+            throw new InvalidOperationException("Cannot add more participants; the event is full.");
         }
             
-        var eventParticipants = new EventParticipant
+        var eventParticipant = new EventParticipant
         {
             EventId = eventId,
             UserId = userId,
@@ -74,14 +89,20 @@ internal class UserServices: IUserServices
             User = user
         };
         
-        await _eventParticipantsRepository.Add(eventParticipants);
+        await _eventParticipantsRepository.Add(eventParticipant, cancellationToken);
     }
 
-    public async Task RemoveUserFromEvent(int eventId, int userId)
+    public async Task RemoveUserFromEvent(int eventId, int userId, CancellationToken cancellationToken)
     {
-        var eventEntity = await _eventRepository.GetById(eventId) ?? throw new ArgumentNullException(nameof(eventId));
-        var user = await _userRepository.GetById(userId) ?? throw new ArgumentNullException(nameof(userId));
+        if (cancellationToken.IsCancellationRequested)
+            throw new OperationCanceledException("Operation was cancelled.");
         
-        await _eventParticipantsRepository.RemoveParticipant(eventId, userId);
+        _ = await _eventRepository.GetById(eventId, cancellationToken) 
+            ?? throw new KeyNotFoundException($"Event with ID {eventId} not found");
+        
+        _ = await _userRepository.GetById(userId, cancellationToken) 
+            ?? throw new KeyNotFoundException($"User with ID {userId} not found");
+        
+        await _eventParticipantsRepository.RemoveParticipant(eventId, userId, cancellationToken);
     }
 }

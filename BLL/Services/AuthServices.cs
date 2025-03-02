@@ -13,7 +13,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace BLL.Services;
 
-internal class AuthServices: IAuthServices
+internal class AuthServices : IAuthServices
 {
     private readonly JwtSettings _jwtSettings;
     private readonly IUserRepository _userRepository;
@@ -32,26 +32,34 @@ internal class AuthServices: IAuthServices
         _mapper = mapper;
     }
 
-    public async Task Registration(UserRegistrationDTO user)
+    public async Task Registration(UserRegistrationDTO user, CancellationToken cancellationToken)
     {
-        var validationResult = await _userValidator.ValidateAsync(user);
+        if (cancellationToken.IsCancellationRequested)
+            throw new OperationCanceledException("Operation was cancelled.");
+        
+        var validationResult = await _userValidator.ValidateAsync(user, cancellationToken);
         if (!validationResult.IsValid)
             throw new ValidationException(validationResult.Errors);
         
-        await _userRepository.Add(_mapper.Map<User>(user));
+        await _userRepository.Add(_mapper.Map<User>(user), cancellationToken);
     }
 
-    public async Task<TokenDTO> Login(LoginDTO loginDto)
+    public async Task<TokenDTO> Login(LoginDTO loginDto, CancellationToken cancellationToken)
     {
-        var user = await _userRepository.Login(loginDto.Email, loginDto.Password);
+        if (cancellationToken.IsCancellationRequested)
+            throw new OperationCanceledException("Operation was cancelled.");
+        
+        var user = await _userRepository.Login(loginDto.Email, loginDto.Password, cancellationToken);
+        if (user == null)
+            throw new UnauthorizedAccessException("Invalid email or password.");
 
-        var accessToken = await GenerateAccessToken(user);
+        var accessToken = await GenerateAccessToken(user, cancellationToken);
         var refreshToken = GenerateRefreshToken();
 
         user.RefreshToken = refreshToken;
         user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(_jwtSettings.Expire);
         
-        await _userRepository.Update(user);
+        await _userRepository.Update(user, cancellationToken);
 
         return new TokenDTO
         {
@@ -61,9 +69,12 @@ internal class AuthServices: IAuthServices
         };
     }
     
-    private async Task<string> GenerateAccessToken(User user)
+    private async Task<string> GenerateAccessToken(User user, CancellationToken cancellationToken)
     {
-        var roles = await _userRepository.GetRoles(user);
+        if (cancellationToken.IsCancellationRequested)
+            throw new OperationCanceledException("Operation was cancelled.");
+        
+        var roles = await _userRepository.GetRoles(user, cancellationToken);
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(_jwtSettings.Issuer);
 
@@ -87,7 +98,7 @@ internal class AuthServices: IAuthServices
         return tokenHandler.WriteToken(token);
     }
     
-    private string GenerateRefreshToken()
+    private static string GenerateRefreshToken()
     {
         var randomNumber = new byte[32];
         using var rng = RandomNumberGenerator.Create();
@@ -126,27 +137,32 @@ internal class AuthServices: IAuthServices
         return principal;
     }
     
-    public async Task<TokenDTO> RefreshToken(string tokenDto)
+    public async Task<TokenDTO> RefreshToken(string tokenDto, CancellationToken cancellationToken)
     {
+        if (cancellationToken.IsCancellationRequested)
+            throw new OperationCanceledException("Operation was cancelled.");
+        
         if (string.IsNullOrWhiteSpace(tokenDto))
-            throw new ArgumentNullException(nameof(tokenDto));
+            throw new ArgumentException(null, nameof(tokenDto));
         
         var principal = GetPrincipalFromExpiredToken(tokenDto);
         var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        var user = await _userRepository.GetById(int.Parse(userId!));
+        var user = await _userRepository.GetById(int.Parse(userId!), cancellationToken);
+        if (user == null)
+            throw new KeyNotFoundException($"User with ID {userId} not found.");
 
         if (user.RefreshTokenExpiryTime < DateTime.UtcNow)
         {
-            throw new SecurityTokenException();
+            throw new SecurityTokenException("Refresh token has expired.");
         }
 
-        var newAccessToken = await GenerateAccessToken(user);
+        var newAccessToken = await GenerateAccessToken(user, cancellationToken);
         var newRefreshToken = GenerateRefreshToken();
 
         user.RefreshToken = newRefreshToken;
         user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(_jwtSettings.Expire);
-        await _userRepository.Update(user);
+        await _userRepository.Update(user, cancellationToken);
 
         return new TokenDTO
         {
